@@ -1,0 +1,53 @@
+---
+- name: Upgrade system
+  hosts: all
+  tasks:
+  - name: Upgrade the system
+    become: True
+    ansible.builtin.apt:
+      upgrade: full
+      update_cache: True
+
+- name: Setup database
+  hosts: database
+  roles:
+  - mariadb
+
+- name: Install php
+  hosts: webserver
+  roles:
+  - php
+
+- name: Configure application
+  hosts: webserver
+  tasks:
+
+  - name: Configure user
+    ansible.builtin.include_tasks: tasks/configure-user.yml
+
+  - name: Copy SamplePage
+    become: true
+    ansible.builtin.copy:
+      src: SamplePage.php
+      dest: /var/www/html/SamplePage.php
+      owner: ubuntu
+      group: www-data
+      mode: '0644'
+
+  - name: sensure inc exist
+    become: True
+    ansible.builtin.file:
+      path: /var/www/inc
+      mode: '2755'
+      owner: ubuntu
+      group: www-data
+      state: directory
+  
+  - name: Template db
+    become: true
+    ansible.builtin.template:
+      src: dbinfo.inc.j2
+      dest: /var/www/inc/dbinfo.inc
+      owner: ubuntu
+      group: www-data
+      mode: '0644'

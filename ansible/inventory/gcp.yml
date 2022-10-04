@@ -1,0 +1,17 @@
+---
+all:
+  hosts:
+    webserver:
+      ansible_user: ubuntu
+      ansible_host: 34.90.219.234
+    database:
+      ansible_user: ubuntu
+      ansible_host: 10.12.2.2
+      ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q ubuntu@34.90.219.234"'
+  children:
+    webserver:
+      hosts:
+        webserver: {}
+    database:
+      hosts:
+        database: {}

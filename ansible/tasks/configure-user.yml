@@ -1,0 +1,45 @@
+- name: Add ubuntu user to www-data
+  become: True
+  ansible.builtin.user:
+    name: ubuntu
+    groups: www-data
+    append: True
+
+- name: Change owner of /var/www
+  become: True
+  ansible.builtin.file:
+    path: /var/www
+    state: directory
+    owner: ubuntu
+    group: www-data
+    mode: '2755'
+
+- name: Find directories within /var/www
+  ansible.builtin.find:
+    paths: /var/www
+    file_type: directory
+  register: _dir_to_update
+
+- name: set the group ID on subdirectories created in the future
+  become: True
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: ubuntu
+    group: www-data
+    mode: '2755'
+  loop: "{{ _dir_to_update.files }}"
+
+- name: Find files within /var/www
+  ansible.builtin.find:
+    paths: /var/www
+  register: _files_to_update
+
+- name: set the group ID on subdirectories created in the future
+  become: True
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: '0644'
+    owner: ubuntu
+    group: www-data
+  loop: "{{ _files_to_update.files }}"

@@ -1,0 +1,9 @@
+<?php
+
+define('DB_SERVER', '{{ hostvars['database']['ansible_host'] }}');
+define('DB_USERNAME', 'root');
+define('DB_PASSWORD', '{{ mariadb_root_password }}');
+define('DB_DATABASE', 'test');
+
+?>
+                
